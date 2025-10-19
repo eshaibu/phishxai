@@ -1,0 +1,60 @@
+seed: 42
+paths:
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+  models: models
+  reports: reports
+
+data:
+  tranco:
+    filename: truncated_5000_tranco_top_1m.csv
+    sample_size: 5000
+  phishtank:
+    filename: truncated_5000_phishtank_verified_online.csv
+    verified_only: true
+    online_only: true
+    sample_size: 5000
+  window:
+    start: null
+    end: null
+
+split:
+  test_ratio: 0.2
+  domain_disjoint: true
+
+features:
+  whitelist:
+    - url_len
+    - host_len
+    - path_len
+    - query_len
+    - n_digits
+    - n_hyphens
+    - n_special
+    - subdomain_depth
+    - has_ip
+    - has_at
+    - pct_encoded
+    - double_slash_in_path
+    - shannon_entropy_url
+    - is_shortener
+    - suspicious_token_present
+
+models:
+  train: ["rf", "xgb", "lgbm", "lr", "linear_svm", "dt"]
+  explain: ["rf", "xgb", "lgbm"]
+
+param_grids:
+  lr: {C: [0.5, 1.0, 2.0], penalty: ["l2"], solver: "liblinear"}
+  linear_svm: {base_C: [0.5, 1.0, 2.0]}   # (Not directly used—SVM is calibrated wrapper)
+  dt: {max_depth: [6, 10, 14], min_samples_leaf: [1, 5]} # Decision Tree
+  rf: {n_estimators: [200], max_depth: [null, 20], max_features: ["sqrt"]} # Random Forest
+  xgb: {n_estimators: [400], max_depth: [5, 7], learning_rate: [0.1, 0.05]} # XGBoost
+  lgbm: {n_estimators: [600], num_leaves: [31, 63], learning_rate: [0.1, 0.05]} #LightGBM
+
+shap:
+  sample_size: 1000
+
+lime:
+  n_examples: 2
