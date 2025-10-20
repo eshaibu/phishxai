@@ -1,6 +1,5 @@
 from typing import Dict, Callable, Any
 import numpy as np
-import pandas as pd
 import joblib
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
@@ -73,17 +72,6 @@ def fit_model(estimator, X, y):
     """
     estimator.fit(X, y)
     return estimator
-
-def ensure_named_frame(X, feature_names=None):
-    """
-    Ensure X has column names for models fitted with names (e.g., LightGBM).
-    If X already has .columns, return as-is; otherwise wrap as a DataFrame when names are known.
-    """
-    if hasattr(X, "columns"):
-        return X
-    if feature_names is None:
-        return X
-    return pd.DataFrame(X, columns=list(feature_names))
 
 def predict_proba_safely(model, X):
     """

@@ -1,9 +1,8 @@
 import os, joblib, logging
-
+import pandas as pd
 from ..config import load_config
 from ..utils.io_utils import read_csv_safely, write_csv
 from ..utils.logging_utils import setup_logging
-from ..utils.model_utils import ensure_named_frame
 
 logger = logging.getLogger(__name__)
 
@@ -20,12 +19,11 @@ def main(cfg_path: str, model_key: str = "xgb"):
     feature_names = [c for c in test.columns if c != "label"]
     X = test[feature_names].values
     y = test["label"].values
-    X_named = ensure_named_frame(X, feature_names)
 
     model_path = os.path.join(cfg["paths"]["models"], f"{model_key}.joblib")
     model = joblib.load(model_path)
 
-    y_pred = model.predict(X_named)
+    y_pred = model.predict(X)
     df_err = test.copy()
     df_err["pred"] = y_pred
     df_err["err"] = (df_err["pred"] != df_err["label"]).astype(int)
