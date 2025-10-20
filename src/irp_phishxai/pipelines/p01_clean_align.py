@@ -33,6 +33,9 @@ def _normalize_tranco(df: pd.DataFrame) -> pd.DataFrame:
     Normalize Tranco list to unified schema: url, label=0, ts (if any), source='tranco'.
     If list date exists, assign it to all rows (optional).
     """
+    # second column is the domain column
+    domain_col = df.columns[1]
+    df = df.rename(columns={domain_col: "domain"})
     url = "https://" + df["domain"].astype(str).str.strip() + "/"
     if "ts" in df.columns:
         ts = pd.to_datetime(df["ts"], errors="coerce")
@@ -66,7 +69,7 @@ def main(cfg_path: str):
     # Load raw CSVs with light dtype hints.
     tr_fp = os.path.join(cfg["paths"]["raw"], cfg["data"]["tranco"]["filename"])
     ph_fp = os.path.join(cfg["paths"]["raw"], cfg["data"]["phishtank"]["filename"])
-    tranco = read_csv_safely(tr_fp, dtype_map={"domain": "string"})
+    tranco = read_csv_safely(tr_fp)
     phish = read_csv_safely(ph_fp)
 
     # Optional sampling to constrain runtime (starter config).

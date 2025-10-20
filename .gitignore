@@ -1,14 +1,71 @@
-# Python
+# ============================================
+# 🐍 Python / Poetry project .gitignore
+# ============================================
+
+# Data & model artifacts
+models/
+data/raw/
+data/interim/
+data/processed/
+experiments/runs/
+reports/figures/
+reports/tables/
+
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.env
+.env.*
 
 # Poetry
-.venv/
-poetry.lock
+# (Keep poetry.lock in Git! It ensures reproducible installs)
+.poetry/
 
-# Editor/OS
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+*.manifest
+*.spec
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Logs and local outputs
+*.log
+logs/
+tmp/
+temp/
+
+# Unit test / coverage reports
+.coverage
+htmlcov/
+.tox/
+.nox/
+.cache/
+pytest_cache/
+coverage.xml
+
+# IDEs / Editors
 .vscode/
 .idea/
+*.sublime-project
+*.sublime-workspace
+
+# macOS / Windows
 .DS_Store
+*.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ============================================
+# End of file
+# ============================================

@@ -1,5 +1,4 @@
 import os, time, logging, yaml
-import pandas as pd
 from ..config import load_config
 from ..utils.io_utils import read_csv_safely, save_yaml, timestamped_run_dir
 from ..utils.model_utils import get_baseline_models, get_param_grids, fit_with_grid, persist_model

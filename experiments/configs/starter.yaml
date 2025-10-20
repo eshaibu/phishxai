@@ -46,8 +46,9 @@ models:
   explain: ["rf", "xgb", "lgbm"]
 
 param_grids:
-  lr: {C: [0.5, 1.0, 2.0], penalty: ["l2"], solver: "liblinear"}
-  linear_svm: {base_C: [0.5, 1.0, 2.0]}   # (Not directly used—SVM is calibrated wrapper)
+  lr: {C: [0.5, 1.0, 2.0], penalty: ["l2"], solver: ["liblinear"]} # Logistic Regression
+#  linear_svm: {base_C: [0.5, 1.0, 2.0]}   # (Not directly used—SVM is calibrated wrapper)
+  linear_svm: {estimator__C: [0.5, 1.0, 2.0]}
   dt: {max_depth: [6, 10, 14], min_samples_leaf: [1, 5]} # Decision Tree
   rf: {n_estimators: [200], max_depth: [null, 20], max_features: ["sqrt"]} # Random Forest
   xgb: {n_estimators: [400], max_depth: [5, 7], learning_rate: [0.1, 0.05]} # XGBoost

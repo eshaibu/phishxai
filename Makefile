@@ -1,4 +1,3 @@
-# Convenience commands; purely optional.
 .PHONY: setup small-run build-dataset train evaluate explain clean
 
 setup:
@@ -17,6 +16,7 @@ build-dataset:
 
 train:
 	poetry run python -m irp_phishxai.cli.train --config experiments/configs/starter.yaml --which all
+	#poetry run python -m irp_phishxai.cli.train --config experiments/configs/starter.yaml --which all --models rf xgb lgbm lr dt
 
 evaluate:
 	poetry run python -m irp_phishxai.cli.evaluate --config experiments/configs/starter.yaml
