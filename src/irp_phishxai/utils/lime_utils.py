@@ -3,6 +3,8 @@ from lime.lime_tabular import LimeTabularExplainer
 import matplotlib.pyplot as plt
 import logging
 
+from ..utils.model_utils import ensure_named_frame
+
 logger = logging.getLogger(__name__)
 
 def explain_instance_lime(model, X_train, feature_names, class_names, x_row, outpath: str):
@@ -17,6 +19,7 @@ def explain_instance_lime(model, X_train, feature_names, class_names, x_row, out
         )
 
         def predict_fn(X):
+            X_named = ensure_named_frame(X, feature_names)
             if hasattr(model, "predict_proba"):
                 return model.predict_proba(X)
             pred = model.predict(X)

@@ -3,7 +3,7 @@ import pandas as pd
 from ..config import load_config
 from ..utils.io_utils import read_csv_safely, write_csv
 from ..utils.metrics_utils import compute_classification_metrics, plot_roc_curve, plot_pr_curve
-from ..utils.model_utils import predict_proba_safely
+from ..utils.model_utils import predict_proba_safely, ensure_named_frame
 from ..utils.logging_utils import setup_logging
 
 logger = logging.getLogger(__name__)
@@ -20,8 +20,11 @@ def main(cfg_path: str, models: list[str] | None = None):
 
     # Load test data and separate features.
     test = read_csv_safely(os.path.join(cfg["paths"]["processed"], "test_features.csv"))
-    X = test.drop(columns=["label"]).values
+    # X = test.drop(columns=["label"]).values
+    feature_names = [c for c in test.columns if c != "label"]
+    X = test[feature_names].values
     y = test["label"].values
+    X_named = ensure_named_frame(X, feature_names)
 
     # Discover available models; optionally filter by CLI list.
     model_dir = cfg["paths"]["models"]
@@ -47,12 +50,12 @@ def main(cfg_path: str, models: list[str] | None = None):
 
         # Inference timing (ms per 1k URLs; deterministic & easy to interpret).
         t0 = time.time()
-        y_pred = model.predict(X)
+        y_pred = model.predict(X_named)
         infer_time = time.time() - t0
         ms_per_1k = (infer_time * 1000.0) / max(1, (len(X) / 1000.0))
 
         # Get probabilities (handles calibrated SVM etc.).
-        y_prob = predict_proba_safely(model, X)
+        y_prob = predict_proba_safely(model, X_named)
 
         # Compute metrics & merge training metadata.
         m = compute_classification_metrics(y, y_pred, y_prob)

@@ -3,7 +3,7 @@ from ..config import load_config
 from ..utils.io_utils import read_csv_safely, write_csv
 from ..utils.shap_utils import compute_treeshap_values, plot_global_importance, plot_beeswarm, plot_local_waterfall
 from ..utils.lime_utils import explain_instance_lime
-from ..utils.model_utils import predict_proba_safely
+from ..utils.model_utils import predict_proba_safely, ensure_named_frame
 from ..utils.logging_utils import setup_logging
 
 logger = logging.getLogger(__name__)
@@ -22,6 +22,7 @@ def main(cfg_path: str, models: list[str] | None = None):
     feature_names = [c for c in test.columns if c != "label"]
     X = test[feature_names].values
     y = test["label"].values
+    X_named = ensure_named_frame(X, feature_names)
 
     explain_models = models or cfg["models"]["explain"]
     out_fig = os.path.join(cfg["paths"]["reports"], "figures")
@@ -50,12 +51,12 @@ def main(cfg_path: str, models: list[str] | None = None):
             logger.warning("SHAP global plots failed for %s: %s", key, e)
 
         # Select a "hard" instance for local SHAP & LIME:
-        preds = model.predict(X)
+        preds = model.predict(X_named)
         errs = np.where(preds != y)[0]
         if len(errs) > 0:
             ix = int(errs[0])
         else:
-            probs = predict_proba_safely(model, X)
+            probs = predict_proba_safely(model, X_named)
             pos = probs[:, 1] if (hasattr(probs, "shape") and probs.ndim == 2 and probs.shape[1] == 2) else probs
             ix = int(np.argmin(np.abs(pos - 0.5)))
 
