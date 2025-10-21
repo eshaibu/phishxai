@@ -1,9 +1,11 @@
-import os
 import logging
+import os
+
 from ..config import load_config
 from ..utils.logging_utils import setup_logging
 
 logger = logging.getLogger(__name__)
+
 
 def main(cfg_path: str):
     """
@@ -22,8 +24,10 @@ def main(cfg_path: str):
 
     logger.info("[p00] Raw files present.")
 
+
 if __name__ == "__main__":
     import argparse
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=False, default="experiments/configs/starter.yaml")
     args = ap.parse_args()

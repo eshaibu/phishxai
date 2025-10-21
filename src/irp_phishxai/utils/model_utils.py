@@ -1,17 +1,19 @@
+import logging
 from typing import Dict, Callable, Any
-import numpy as np
+
 import joblib
+import lightgbm as lgb
+import numpy as np
+import xgboost as xgb
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV
 from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.calibration import CalibratedClassifierCV
-import xgboost as xgb
-import lightgbm as lgb
-from sklearn.model_selection import GridSearchCV
-import logging
 
 logger = logging.getLogger(__name__)
+
 
 def get_baseline_models(cfg: Dict) -> Dict[str, Callable[[], Any]]:
     """
@@ -25,6 +27,7 @@ def get_baseline_models(cfg: Dict) -> Dict[str, Callable[[], Any]]:
         "linear_svm": lambda: CalibratedClassifierCV(LinearSVC(C=1.0), cv=3, method="sigmoid"),
         "dt": lambda: DecisionTreeClassifier(),
     }
+
 
 def get_ensemble_models(cfg: Dict) -> Dict[str, Callable[[], Any]]:
     """
@@ -42,11 +45,13 @@ def get_ensemble_models(cfg: Dict) -> Dict[str, Callable[[], Any]]:
         ),
     }
 
+
 def get_param_grids(cfg: Dict) -> Dict[str, Dict]:
     """
     Pass through param grids from config; return empty dict if absent.
     """
     return cfg.get("param_grids", {})
+
 
 def fit_with_grid(model, param_grid: Dict, X, y, scoring="f1_macro", cv=3):
     """
@@ -66,12 +71,14 @@ def fit_with_grid(model, param_grid: Dict, X, y, scoring="f1_macro", cv=3):
         logger.exception("Grid search failed: %s", e)
         raise
 
+
 def fit_model(estimator, X, y):
     """
     Direct fit helper for consistency with ensemble/baseline code.
     """
     estimator.fit(X, y)
     return estimator
+
 
 def predict_proba_safely(model, X):
     """
@@ -91,6 +98,7 @@ def predict_proba_safely(model, X):
     else:
         preds = model.predict(X)
         return preds.astype(float)
+
 
 def persist_model(model, path: str) -> None:
     """

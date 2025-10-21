@@ -1,7 +1,8 @@
-import os
-import yaml
 import logging
+import os
 from typing import Any, Dict
+
+import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,7 @@ DEFAULTS = {
     "lime": {"n_examples": 2},
 }
 
+
 def _deep_update(d: Dict, u: Dict) -> Dict:
     """
     Recursively update dict `d` with values from `u`.
@@ -45,6 +47,7 @@ def _deep_update(d: Dict, u: Dict) -> Dict:
         else:
             d[k] = v
     return d
+
 
 def load_config(path_or_dict: str | Dict[str, Any] | None = None) -> Dict[str, Any]:
     """

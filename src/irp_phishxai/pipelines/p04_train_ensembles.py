@@ -1,11 +1,15 @@
-import os, time, logging, yaml
-import pandas as pd
+import logging
+import os
+import time
+import yaml
+
 from ..config import load_config
 from ..utils.io_utils import read_csv_safely, save_yaml, timestamped_run_dir
-from ..utils.model_utils import get_ensemble_models, get_param_grids, fit_with_grid, persist_model
 from ..utils.logging_utils import setup_logging
+from ..utils.model_utils import get_ensemble_models, get_param_grids, fit_with_grid, persist_model
 
 logger = logging.getLogger(__name__)
+
 
 def main(cfg_path: str, models: list[str] | None = None):
     """
@@ -56,8 +60,10 @@ def main(cfg_path: str, models: list[str] | None = None):
     save_yaml(metrics, os.path.join(run_dir, "ensemble_training.yaml"))
     logger.info("[train-ensemble] done. run_dir=%s", run_dir)
 
+
 if __name__ == "__main__":
     import argparse
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="experiments/configs/starter.yaml")
     ap.add_argument("--models", nargs="*", default=None)

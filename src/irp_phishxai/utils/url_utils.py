@@ -1,14 +1,16 @@
+import logging
+import math
+import re
 from typing import Dict
 from urllib.parse import urlparse, unquote
-import re
-import math
+
 import tldextract
-import logging
 
 logger = logging.getLogger(__name__)
 
 # Popular shortener hosts to flag (heuristic).
-SHORTENERS = {"bit.ly","t.co","goo.gl","tinyurl.com","ow.ly","is.gd","buff.ly","rebrand.ly"}
+SHORTENERS = {"bit.ly", "t.co", "goo.gl", "tinyurl.com", "ow.ly", "is.gd", "buff.ly", "rebrand.ly"}
+
 
 def safe_parse_url(url: str) -> Dict:
     """
@@ -24,6 +26,7 @@ def safe_parse_url(url: str) -> Dict:
         logger.debug("URL parse failed: %s (%s)", url, e)
         return {}
 
+
 def extract_etld1(host: str) -> str:
     """
     Extract effective TLD+1 using tldextract.
@@ -38,6 +41,7 @@ def extract_etld1(host: str) -> str:
         logger.debug("eTLD+1 extraction failed: %s (%s)", host, e)
         return ""
 
+
 def shannon_entropy(s: str) -> float:
     """
     Compute Shannon entropy over characters in string s.
@@ -45,8 +49,9 @@ def shannon_entropy(s: str) -> float:
     """
     if not s:
         return 0.0
-    freqs = {ch: s.count(ch)/len(s) for ch in set(s)}
+    freqs = {ch: s.count(ch) / len(s) for ch in set(s)}
     return -sum(p * math.log2(p) for p in freqs.values())
+
 
 def has_ip_host(host: str) -> bool:
     """
@@ -54,12 +59,14 @@ def has_ip_host(host: str) -> bool:
     """
     return bool(re.fullmatch(r"(?:\d{1,3}\.){3}\d{1,3}", host))
 
+
 def is_url_shortener(host: str) -> bool:
     """
     Check if host is in a small whitelist of common URL shorteners.
     """
     h = host.lower()
-    return h in SHORTENERS or any(h.endswith("."+s) for s in SHORTENERS)
+    return h in SHORTENERS or any(h.endswith("." + s) for s in SHORTENERS)
+
 
 def char_count_features(url: str) -> Dict:
     """
@@ -82,5 +89,6 @@ def char_count_features(url: str) -> Dict:
         "pct_encoded": int("%" in (url or "")),
         "double_slash_in_path": int("//" in (path or "")),
         "shannon_entropy_url": shannon_entropy(u),
-        "suspicious_token_present": int(any(tok in u.lower() for tok in ["login","verify","update","secure","account","bank"])),
+        "suspicious_token_present": int(
+            any(tok in u.lower() for tok in ["login", "verify", "update", "secure", "account", "bank"])),
     }

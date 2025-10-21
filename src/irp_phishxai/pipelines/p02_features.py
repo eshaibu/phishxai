@@ -1,11 +1,13 @@
-import os
 import logging
+import os
+
 from ..config import load_config
-from ..utils.io_utils import read_csv_safely, write_csv, DTYPE_MAP_FEATURES
 from ..utils.feature_utils import build_feature_frame, select_feature_whitelist, cast_dtypes
+from ..utils.io_utils import read_csv_safely, write_csv, DTYPE_MAP_FEATURES
 from ..utils.logging_utils import setup_logging
 
 logger = logging.getLogger(__name__)
+
 
 def main(cfg_path: str):
     """
@@ -29,8 +31,10 @@ def main(cfg_path: str):
     write_csv(feats, tmp)
     logger.info("[p02] wrote features %s cols=%d rows=%d", tmp, len(feats.columns), len(feats))
 
+
 if __name__ == "__main__":
     import argparse
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="experiments/configs/starter.yaml")
     args = ap.parse_args()

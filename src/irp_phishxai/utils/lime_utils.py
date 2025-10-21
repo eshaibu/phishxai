@@ -1,9 +1,11 @@
-import numpy as np
-from lime.lime_tabular import LimeTabularExplainer
-import matplotlib.pyplot as plt
 import logging
 
+import matplotlib.pyplot as plt
+import numpy as np
+from lime.lime_tabular import LimeTabularExplainer
+
 logger = logging.getLogger(__name__)
+
 
 def explain_instance_lime(model, X_train, feature_names, class_names, x_row, outpath: str):
     """

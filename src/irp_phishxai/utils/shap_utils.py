@@ -1,8 +1,10 @@
-import shap
-import matplotlib.pyplot as plt
 import logging
 
+import matplotlib.pyplot as plt
+import shap
+
 logger = logging.getLogger(__name__)
+
 
 def compute_treeshap_values(model, X_sample):
     """
@@ -17,6 +19,7 @@ def compute_treeshap_values(model, X_sample):
         logger.exception("Failed to compute SHAP values: %s", e)
         raise
 
+
 def plot_global_importance(shap_values, feature_names, outpath: str):
     """
     Save a bar plot of mean |SHAP| values per feature.
@@ -30,6 +33,7 @@ def plot_global_importance(shap_values, feature_names, outpath: str):
         logger.exception("Failed SHAP bar plot: %s", e)
         raise
 
+
 def plot_beeswarm(shap_values, X_sample, outpath: str):
     """
     Save a SHAP beeswarm plot to show distribution of impacts per feature.
@@ -42,6 +46,7 @@ def plot_beeswarm(shap_values, X_sample, outpath: str):
     except Exception as e:
         logger.exception("Failed SHAP beeswarm plot: %s", e)
         raise
+
 
 def plot_local_waterfall(shap_values_row, outpath: str):
     """

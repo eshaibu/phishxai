@@ -1,9 +1,12 @@
-import pandas as pd
-from typing import Dict, List
 import logging
+from typing import Dict, List
+
+import pandas as pd
+
 from .url_utils import safe_parse_url, extract_etld1, has_ip_host, is_url_shortener, char_count_features
 
 logger = logging.getLogger(__name__)
+
 
 def _row_url_parts(url: str) -> Dict:
     """
@@ -34,6 +37,7 @@ def _row_url_parts(url: str) -> Dict:
         "is_shortener": int(is_url_shortener(host)),
     }
 
+
 def build_feature_frame(df_urls: pd.DataFrame, cfg: Dict) -> pd.DataFrame:
     """
     Convert aligned URL rows into a numeric/boolean feature DataFrame.
@@ -49,7 +53,7 @@ def build_feature_frame(df_urls: pd.DataFrame, cfg: Dict) -> pd.DataFrame:
         out = pd.concat([parts, chars, df_urls[["label"]]], axis=1)
 
         # Cast numerics to float32 for efficiency; label to int32.
-        num_cols = [c for c in out.columns if c not in ["host","path","query","etld1","label"]]
+        num_cols = [c for c in out.columns if c not in ["host", "path", "query", "etld1", "label"]]
         out[num_cols] = out[num_cols].apply(pd.to_numeric, errors="coerce").astype("float32")
         out["label"] = out["label"].astype("int32")
         logger.info("Feature frame built (rows=%d, cols=%d)", len(out), out.shape[1])
@@ -61,6 +65,7 @@ def build_feature_frame(df_urls: pd.DataFrame, cfg: Dict) -> pd.DataFrame:
         logger.exception("Failed to build feature frame: %s", e)
         raise
 
+
 def cast_dtypes(df: pd.DataFrame) -> pd.DataFrame:
     """
     Downcast Python bools to uint8 (smaller on disk/memory).
@@ -69,6 +74,7 @@ def cast_dtypes(df: pd.DataFrame) -> pd.DataFrame:
         if df[c].dtype == "bool":
             df[c] = df[c].astype("uint8")
     return df
+
 
 def select_feature_whitelist(df: pd.DataFrame, whitelist: List[str]) -> pd.DataFrame:
     """

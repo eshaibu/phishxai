@@ -1,19 +1,23 @@
+import logging
 import os
+
 import pandas as pd
 from dateutil import parser as dtparse
-import logging
+
 from ..config import load_config
-from ..utils.logging_utils import setup_logging
-from ..utils.io_utils import read_csv_safely, write_csv
 from ..utils.feature_utils import _row_url_parts
+from ..utils.io_utils import read_csv_safely, write_csv
+from ..utils.logging_utils import setup_logging
 
 logger = logging.getLogger(__name__)
+
 
 def _normalize_phishtank(df: pd.DataFrame) -> pd.DataFrame:
     """
     Normalize PhishTank feed to unified schema: url, label=1, ts, source='phishtank'.
     Prefers verification_time; falls back to submission_time if missing.
     """
+
     def _pick_ts(row) -> pd.Timestamp:
         ts = row.get("verification_time") or row.get("submission_time")
         try:
@@ -28,6 +32,7 @@ def _normalize_phishtank(df: pd.DataFrame) -> pd.DataFrame:
         "source": "phishtank"
     })
     return out
+
 
 def _normalize_tranco(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -48,15 +53,17 @@ def _normalize_tranco(df: pd.DataFrame) -> pd.DataFrame:
     out = pd.DataFrame({"url": url, "label": 0, "ts": ts, "source": "tranco"})
     return out
 
+
 def _clean_parse_and_dedup(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add host and eTLD+1, drop malformed and exact URL duplicates.
     """
-    parts = df["url"].apply(_row_url_parts).apply(pd.Series)[["host","etld1"]]
+    parts = df["url"].apply(_row_url_parts).apply(pd.Series)[["host", "etld1"]]
     out = pd.concat([df.reset_index(drop=True), parts.reset_index(drop=True)], axis=1)
     out = out[out["host"] != ""].copy()  # remove malformed/hostless URLs
     out = out.drop_duplicates(subset=["url"], keep="first").reset_index(drop=True)
     return out
+
 
 def main(cfg_path: str):
     """
@@ -110,8 +117,10 @@ def main(cfg_path: str):
     write_csv(aligned, out_fp)
     logger.info("[p01] wrote %s rows=%d", out_fp, len(aligned))
 
+
 if __name__ == "__main__":
     import argparse
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="experiments/configs/starter.yaml")
     args = ap.parse_args()

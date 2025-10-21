@@ -1,14 +1,16 @@
+import logging
 import os
 from typing import Dict
+
+import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import (
     accuracy_score, f1_score, roc_auc_score, average_precision_score,
     confusion_matrix, roc_curve, precision_recall_curve
 )
-import matplotlib.pyplot as plt
-import logging
 
 logger = logging.getLogger(__name__)
+
 
 def _ensure_probs(y_prob: np.ndarray) -> np.ndarray:
     """
@@ -19,6 +21,7 @@ def _ensure_probs(y_prob: np.ndarray) -> np.ndarray:
     if y_prob.ndim == 2 and y_prob.shape[1] == 2:
         return y_prob[:, 1]
     return y_prob
+
 
 def fpr_at_tpr(y_true: np.ndarray, y_prob: np.ndarray, target_tpr: float = 0.95) -> float:
     """
@@ -31,6 +34,7 @@ def fpr_at_tpr(y_true: np.ndarray, y_prob: np.ndarray, target_tpr: float = 0.95)
     if len(idx) == 0:
         return float("nan")
     return float(fpr[idx[0]])
+
 
 def compute_classification_metrics(y_true, y_pred, y_prob) -> Dict:
     """
@@ -52,6 +56,7 @@ def compute_classification_metrics(y_true, y_pred, y_prob) -> Dict:
         logger.exception("Failed computing metrics: %s", e)
         raise
 
+
 def plot_roc_curve(y_true, y_prob, outpath: str) -> None:
     """
     Save a ROC curve PNG for quick visual comparison.
@@ -70,6 +75,7 @@ def plot_roc_curve(y_true, y_prob, outpath: str) -> None:
     plt.tight_layout()
     plt.savefig(outpath)
     plt.close()
+
 
 def plot_pr_curve(y_true, y_prob, outpath: str) -> None:
     """

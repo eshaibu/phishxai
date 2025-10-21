@@ -1,12 +1,19 @@
-import os, time, yaml, logging, joblib
+import joblib
+import logging
+import os
+import time
+import yaml
+
 import pandas as pd
+
 from ..config import load_config
 from ..utils.io_utils import read_csv_safely, write_csv
+from ..utils.logging_utils import setup_logging
 from ..utils.metrics_utils import compute_classification_metrics, plot_roc_curve, plot_pr_curve
 from ..utils.model_utils import predict_proba_safely
-from ..utils.logging_utils import setup_logging
 
 logger = logging.getLogger(__name__)
+
 
 def main(cfg_path: str, models: list[str] | None = None):
     """
@@ -76,8 +83,10 @@ def main(cfg_path: str, models: list[str] | None = None):
     write_csv(metrics_df, os.path.join(cfg["paths"]["tables"], "metrics.csv"))
     logger.info("[evaluate] wrote reports/tables/metrics.csv")
 
+
 if __name__ == "__main__":
     import argparse
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="experiments/configs/starter.yaml")
     ap.add_argument("--models", nargs="*", default=None)

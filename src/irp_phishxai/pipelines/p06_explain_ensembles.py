@@ -1,12 +1,18 @@
-import os, logging, joblib, numpy as np, pandas as pd
+import joblib
+import logging
+import numpy as np
+import os
+import pandas as pd
+
 from ..config import load_config
 from ..utils.io_utils import read_csv_safely, write_csv
-from ..utils.shap_utils import compute_treeshap_values, plot_global_importance, plot_beeswarm, plot_local_waterfall
 from ..utils.lime_utils import explain_instance_lime
-from ..utils.model_utils import predict_proba_safely
 from ..utils.logging_utils import setup_logging
+from ..utils.model_utils import predict_proba_safely
+from ..utils.shap_utils import compute_treeshap_values, plot_global_importance, plot_beeswarm, plot_local_waterfall
 
 logger = logging.getLogger(__name__)
+
 
 def main(cfg_path: str, models: list[str] | None = None):
     """
@@ -67,7 +73,7 @@ def main(cfg_path: str, models: list[str] | None = None):
             logger.warning("SHAP local waterfall failed for %s: %s", key, e)
 
         try:
-            explain_instance_lime(model, X, feature_names, ["benign","phish"],
+            explain_instance_lime(model, X, feature_names, ["benign", "phish"],
                                   test.iloc[ix][feature_names].values, os.path.join(out_fig, f"lime_{key}.png"))
         except Exception as e:
             logger.warning("LIME explanation failed for %s: %s", key, e)
@@ -78,8 +84,10 @@ def main(cfg_path: str, models: list[str] | None = None):
         write_csv(pd.DataFrame(rows), os.path.join(out_tbl, "feature_rankings.csv"))
     logger.info("[explain] SHAP/LIME artifacts saved.")
 
+
 if __name__ == "__main__":
     import argparse
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="experiments/configs/starter.yaml")
     ap.add_argument("--models", nargs="*", default=None)

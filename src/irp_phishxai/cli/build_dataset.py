@@ -5,6 +5,7 @@ from ..pipelines.p02_split import main as s3
 
 if __name__ == "__main__":
     import argparse
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="experiments/configs/starter.yaml")
     args = ap.parse_args()

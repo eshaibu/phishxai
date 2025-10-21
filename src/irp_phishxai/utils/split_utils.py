@@ -1,9 +1,11 @@
-import pandas as pd
-from typing import Tuple
-from sklearn.model_selection import train_test_split
 import logging
+from typing import Tuple
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
 
 logger = logging.getLogger(__name__)
+
 
 def train_test_time_domain_split(df: pd.DataFrame, test_ratio: float, seed: int) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """

@@ -1,11 +1,13 @@
-import os
 import logging
+import os
+
 from ..config import load_config
 from ..utils.io_utils import read_csv_safely, write_csv, DTYPE_MAP_FEATURES
-from ..utils.split_utils import train_test_time_domain_split
 from ..utils.logging_utils import setup_logging
+from ..utils.split_utils import train_test_time_domain_split
 
 logger = logging.getLogger(__name__)
+
 
 def main(cfg_path: str):
     """
@@ -39,8 +41,10 @@ def main(cfg_path: str):
     write_csv(test_out, os.path.join(cfg["paths"]["processed"], "test_features.csv"))
     logger.info("[p02_split] wrote processed train/test CSVs.")
 
+
 if __name__ == "__main__":
     import argparse
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="experiments/configs/starter.yaml")
     args = ap.parse_args()
