@@ -67,13 +67,13 @@ def main(cfg_path: str, models: list[str] | None = None):
 
         # Generate ROC/PR plots (fail-soft: log and continue if an error occurs).
         try:
-            plot_roc_curve(y, y_prob, os.path.join(cfg["paths"]["reports"], "figures", f"roc_{key}.png"))
-            plot_pr_curve(y, y_prob, os.path.join(cfg["paths"]["reports"], "figures", f"pr_{key}.png"))
+            plot_roc_curve(y, y_prob, os.path.join(cfg["paths"]["figures"], f"roc_{key}.png"))
+            plot_pr_curve(y, y_prob, os.path.join(cfg["paths"]["figures"], f"pr_{key}.png"))
         except Exception as e:
             logger.warning("Plotting error for %s: %s", key, e)
 
     metrics_df = pd.DataFrame(rows)
-    write_csv(metrics_df, os.path.join(cfg["paths"]["reports"], "tables", "metrics.csv"))
+    write_csv(metrics_df, os.path.join(cfg["paths"]["tables"], "metrics.csv"))
     logger.info("[evaluate] wrote reports/tables/metrics.csv")
 
 if __name__ == "__main__":

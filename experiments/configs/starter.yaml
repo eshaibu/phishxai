@@ -5,6 +5,8 @@ paths:
   processed: data/processed
   models: models
   reports: reports
+  figures: reports/figures
+  tables: reports/tables
 
 data:
   tranco:

@@ -27,6 +27,11 @@ DTYPE_MAP_FEATURES: Dict[str, Any] = {
     "label": "int32",
 }
 
+def ensure_dirs(cfg):
+    """Create all directories defined under cfg['paths'] if they don't exist."""
+    for key, path in cfg.get("paths", {}).items():
+        os.makedirs(path, exist_ok=True)
+
 def read_csv_safely(path: str, dtype_map: Optional[Dict] = None, chunksize: Optional[int] = None) -> pd.DataFrame:
     """
     Read a CSV into a DataFrame with optional dtype hints and chunking.

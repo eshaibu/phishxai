@@ -3,6 +3,7 @@ import pandas as pd
 from dateutil import parser as dtparse
 import logging
 from ..config import load_config
+from ..utils.logging_utils import setup_logging
 from ..utils.io_utils import read_csv_safely, write_csv
 from ..utils.feature_utils import _row_url_parts
 
@@ -62,7 +63,6 @@ def main(cfg_path: str):
     Stage p01: Read raw CSVs, normalize schema, deduplicate, remove cross-domain overlaps, apply time window.
     Writes: data/interim/aligned_urls.csv
     """
-    from ..utils.logging_utils import setup_logging
     setup_logging()
     cfg = load_config(cfg_path)
 

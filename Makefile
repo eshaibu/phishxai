@@ -1,4 +1,4 @@
-.PHONY: setup small-run build-dataset train evaluate explain clean
+.PHONY: setup small-run build-dataset train evaluate explain error-analysis clean
 
 setup:
 	# Create/refresh the Poetry virtual environment and install deps.
@@ -23,6 +23,9 @@ evaluate:
 
 explain:
 	poetry run python -m irp_phishxai.cli.explain --config experiments/configs/starter.yaml
+
+error-analysis:
+	poetry run python -m irp_phishxai.cli.error_analysis --config experiments/configs/starter.yaml --model_key xgb
 
 clean:
 	# Remove generated artifacts to reset the project.

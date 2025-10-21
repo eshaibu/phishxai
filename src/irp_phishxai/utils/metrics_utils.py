@@ -1,3 +1,4 @@
+import os
 from typing import Dict
 import numpy as np
 from sklearn.metrics import (
@@ -55,6 +56,8 @@ def plot_roc_curve(y_true, y_prob, outpath: str) -> None:
     """
     Save a ROC curve PNG for quick visual comparison.
     """
+    os.makedirs(os.path.dirname(outpath), exist_ok=True)
+
     y_prob = _ensure_probs(y_prob)
     fpr, tpr, _ = roc_curve(y_true, y_prob)
     plt.figure()
@@ -72,6 +75,8 @@ def plot_pr_curve(y_true, y_prob, outpath: str) -> None:
     """
     Save a Precision–Recall curve PNG (especially informative for positive/rare class).
     """
+    os.makedirs(os.path.dirname(outpath), exist_ok=True)
+
     y_prob = _ensure_probs(y_prob)
     prec, rec, _ = precision_recall_curve(y_true, y_prob)
     plt.figure()
