@@ -27,10 +27,12 @@ DTYPE_MAP_FEATURES: Dict[str, Any] = {
     "label": "int32",
 }
 
+
 def ensure_dirs(cfg):
     """Create all directories defined under cfg['paths'] if they don't exist."""
     for key, path in cfg.get("paths", {}).items():
         os.makedirs(path, exist_ok=True)
+
 
 def read_csv_safely(path: str, dtype_map: Optional[Dict] = None, chunksize: Optional[int] = None) -> pd.DataFrame:
     """
@@ -55,6 +57,7 @@ def read_csv_safely(path: str, dtype_map: Optional[Dict] = None, chunksize: Opti
         logger.exception("Failed to read CSV: %s (%s)", path, e)
         raise
 
+
 def write_csv(df: pd.DataFrame, path: str) -> None:
     """
     Write a DataFrame to CSV with directory creation and logging.
@@ -66,6 +69,7 @@ def write_csv(df: pd.DataFrame, path: str) -> None:
     except Exception as e:
         logger.exception("Failed to write CSV: %s (%s)", path, e)
         raise
+
 
 def save_yaml(obj: Dict, path: str) -> None:
     """
@@ -80,6 +84,7 @@ def save_yaml(obj: Dict, path: str) -> None:
         logger.exception("Failed to write YAML: %s (%s)", path, e)
         raise
 
+
 def save_json(obj: Dict, path: str) -> None:
     """
     JSON dump with indent and folder auto-creation.
@@ -92,6 +97,7 @@ def save_json(obj: Dict, path: str) -> None:
     except Exception as e:
         logger.exception("Failed to write JSON: %s (%s)", path, e)
         raise
+
 
 def timestamped_run_dir(base: str = "experiments/runs") -> str:
     """

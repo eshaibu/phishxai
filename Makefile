@@ -25,7 +25,7 @@ explain:
 	poetry run python -m irp_phishxai.cli.explain --config experiments/configs/starter.yaml
 
 error-analysis:
-	poetry run python -m irp_phishxai.cli.error_analysis --config experiments/configs/starter.yaml --model_key xgb
+	poetry run python -m irp_phishxai.cli.error_analysis --config experiments/configs/starter.yaml
 
 clean:
 	# Remove generated artifacts to reset the project.
