@@ -1,7 +1,8 @@
-import joblib
 import logging
-import numpy as np
 import os
+
+import joblib
+import numpy as np
 import pandas as pd
 
 from ..config import load_config
@@ -45,7 +46,7 @@ def main(cfg_path: str, models: list[str] | None = None):
         n = min(cfg["shap"]["sample_size"], len(test))
         rng = np.random.default_rng(cfg["seed"])
         idx = rng.choice(len(test), size=n, replace=False)
-        Xs = test.iloc[idx][feature_names].values
+        Xs = test.iloc[idx][feature_names]
 
         # Compute SHAP & save global plots (fail-soft).
         try:
@@ -67,14 +68,14 @@ def main(cfg_path: str, models: list[str] | None = None):
 
         # SHAP local (waterfall) and LIME plot (fail-soft individually).
         try:
-            sv_local = compute_treeshap_values(model, test.iloc[[ix]][feature_names].values)
-            plot_local_waterfall(sv_local[0], os.path.join(out_fig, f"shap_waterfall_{key}.png"))
+            sv_local = compute_treeshap_values(model, test.iloc[[ix]][feature_names])
+            plot_local_waterfall(sv_local, os.path.join(out_fig, f"shap_waterfall_{key}.png"))
         except Exception as e:
             logger.warning("SHAP local waterfall failed for %s: %s", key, e)
 
         try:
             explain_instance_lime(model, X, feature_names, ["benign", "phish"],
-                                  test.iloc[ix][feature_names].values, os.path.join(out_fig, f"lime_{key}.png"))
+                                  test.iloc[ix][feature_names], os.path.join(out_fig, f"lime_{key}.png"))
         except Exception as e:
             logger.warning("LIME explanation failed for %s: %s", key, e)
 
