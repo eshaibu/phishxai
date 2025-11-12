@@ -1,16 +1,20 @@
 import logging
+import os
 from typing import Dict, Callable, Any
 
 import joblib
 import lightgbm as lgb
 import numpy as np
 import xgboost as xgb
+import yaml
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
+
+from .io_utils import save_yaml
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +102,23 @@ def predict_proba_safely(model, X):
     else:
         preds = model.predict(X)
         return preds.astype(float)
+
+
+def load_or_init_metadata(meta_path: str) -> dict:
+    if os.path.exists(meta_path):
+        with open(meta_path, "r") as f:
+            return yaml.safe_load(f) or {}
+    return {}
+
+
+def merge_and_save_metadata(meta_path: str, new_metrics: dict, run_dir: str, stage_name: str) -> None:
+    # Merge into shared metadata
+    prev = load_or_init_metadata(meta_path)
+    prev.update(new_metrics)
+    save_yaml(prev, meta_path)
+
+    # Also save stage-specific snapshot for reproducibility
+    save_yaml(new_metrics, os.path.join(run_dir, f"{stage_name}.yaml"))
 
 
 def persist_model(model, path: str) -> None:

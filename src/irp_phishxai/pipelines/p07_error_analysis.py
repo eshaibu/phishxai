@@ -20,7 +20,7 @@ def main(cfg_path: str, model_key: str | None = None):
     # Load test set
     test = read_csv_safely(os.path.join(cfg["paths"]["processed"], "test_features.csv"))
     feature_names = [c for c in test.columns if c != "label"]
-    X = test[feature_names].values
+    X = test[feature_names]
     y = test["label"].values
 
     # Determine which models to analyze

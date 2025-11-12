@@ -26,7 +26,7 @@ def main(cfg_path: str, models: list[str] | None = None):
     test = read_csv_safely(os.path.join(cfg["paths"]["processed"], "test_features.csv"))
 
     feature_names = [c for c in test.columns if c != "label"]
-    X = test[feature_names].values
+    X = test[feature_names]
     y = test["label"].values
 
     explain_models = models or cfg["models"]["explain"]

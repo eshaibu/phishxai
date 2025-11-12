@@ -17,12 +17,12 @@ DEFAULTS = {
         "reports": "reports",
     },
     "data": {
-        "tranco": {"filename": "truncated_10_tranco_top_1m.csv", "sample_size": 25000},
+        "tranco": {"filename": "truncated_10000_tranco_top_1m.csv", "sample_size": 10000},
         "phishtank": {
-            "filename": "truncated_10_phishtank_verified_online.csv",
+            "filename": "truncated_10000_phishtank_verified_online.csv",
             "verified_only": True,
             "online_only": True,
-            "sample_size": 25000,
+            "sample_size": 10000,
         },
         "window": {"start": None, "end": None},
     },
@@ -30,7 +30,7 @@ DEFAULTS = {
     "features": {"whitelist": []},
     "models": {"train": ["rf", "xgb", "lgbm", "lr", "linear_svm", "dt"], "explain": ["rf", "xgb", "lgbm"]},
     "param_grids": {},
-    "shap": {"sample_size": 8000},
+    "shap": {"sample_size": 2000},
     "lime": {"n_examples": 2},
 }
 

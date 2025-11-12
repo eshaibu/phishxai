@@ -27,7 +27,7 @@ def main(cfg_path: str, models: list[str] | None = None):
 
     # Load test data and separate features.
     test = read_csv_safely(os.path.join(cfg["paths"]["processed"], "test_features.csv"))
-    X = test.drop(columns=["label"]).values
+    X = test.drop(columns=["label"])
     y = test["label"].values
 
     # Discover available models; optionally filter by CLI list.

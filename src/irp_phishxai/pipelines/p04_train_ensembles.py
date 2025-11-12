@@ -1,12 +1,14 @@
 import logging
 import os
 import time
-import yaml
+import warnings
 
 from ..config import load_config
 from ..utils.io_utils import read_csv_safely, save_yaml, timestamped_run_dir
 from ..utils.logging_utils import setup_logging
-from ..utils.model_utils import get_ensemble_models, get_param_grids, fit_with_grid, persist_model
+from ..utils.model_utils import get_ensemble_models, get_param_grids, fit_with_grid, merge_and_save_metadata, persist_model
+
+warnings.filterwarnings('ignore', message='.*No further splits.*')
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +25,9 @@ def main(cfg_path: str, models: list[str] | None = None):
     save_yaml(cfg, os.path.join(run_dir, "config_snapshot.yaml"))
 
     train = read_csv_safely(os.path.join(cfg["paths"]["processed"], "train_features.csv"))
-    X = train.drop(columns=["label"]).values
+    X = train.drop(columns=["label"])
     y = train["label"].values
+    feature_names = list(X.columns)
 
     all_ens = get_ensemble_models(cfg)
     grids = get_param_grids(cfg)
@@ -48,16 +51,11 @@ def main(cfg_path: str, models: list[str] | None = None):
             "model_path": f"{key}.joblib",
             "fit_time_s": round(fit_time, 4),
             "model_size_kb": round(size_kb, 2),
+            "feature_names": feature_names,
         }
 
     meta_path = os.path.join(cfg["paths"]["models"], "metadata.yaml")
-    prev = {}
-    if os.path.exists(meta_path):
-        with open(meta_path, "r") as f:
-            prev = yaml.safe_load(f) or {}
-    prev.update(metrics)
-    save_yaml(prev, meta_path)
-    save_yaml(metrics, os.path.join(run_dir, "ensemble_training.yaml"))
+    merge_and_save_metadata(meta_path, metrics, run_dir, "ensemble_training")
     logger.info("[train-ensemble] done. run_dir=%s", run_dir)
 
 
