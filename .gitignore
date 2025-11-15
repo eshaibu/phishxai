@@ -4,6 +4,7 @@
 
 # Data & model artifacts
 models/
+data/files/
 data/interim/
 data/processed/
 experiments/runs/
