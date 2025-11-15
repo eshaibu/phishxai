@@ -15,6 +15,8 @@ DEFAULTS = {
         "processed": "data/processed",
         "models": "models",
         "reports": "reports",
+        "figures": "reports/figures",
+        "tables": "reports/tables"
     },
     "data": {
         "tranco": {"filename": "truncated_10000_tranco_top_1m.csv", "sample_size": 10000},
@@ -28,10 +30,51 @@ DEFAULTS = {
     },
     "split": {"test_ratio": 0.2, "domain_disjoint": True},
     "features": {"whitelist": []},
-    "models": {"train": ["rf", "xgb", "lgbm", "lr", "linear_svm", "dt"], "explain": ["rf", "xgb", "lgbm"]},
-    "param_grids": {},
+    "models": {
+        "train": ["rf", "xgb", "lgbm", "lr", "linear_svm", "dt"],
+        "explain": ["rf", "xgb", "lgbm"]
+    },
     "shap": {"sample_size": 2000},
     "lime": {"n_examples": 2},
+    # "param_grids": {
+    #     # Baselines - Wide regularization range
+    #     "lr": {
+    #         "C": [0.1, 1.0, 10.0],
+    #         "penalty": ["l2"],
+    #         "solver": ["liblinear"]
+    #     },
+    #     "linear_svm": {
+    #         "estimator__C": [0.1, 1.0, 10.0]
+    #     },
+    #     # Decision Tree - Key regularization params
+    #     "dt": {
+    #         "max_depth": [8, 12, None],
+    #         "min_samples_split": [10, 50],
+    #         "min_samples_leaf": [5, 10]
+    #     },
+    #     # Random Forest - Standard best practice
+    #     "rf": {
+    #         "n_estimators": [200, 300],
+    #         "max_depth": [None],  # Always unlimited for RF
+    #         "min_samples_leaf": [2, 5]
+    #     },
+    #     # XGBoost - Balanced exploration
+    #     "xgb": {
+    #         "n_estimators": [400],
+    #         "max_depth": [5, 7],
+    #         "learning_rate": [0.05, 0.1],
+    #         "subsample": [0.8, 1.0],
+    #         "min_child_weight": [1, 3]
+    #     },
+    #     # LightGBM - Key regularization params
+    #     "lgbm": {
+    #         "n_estimators": [600],
+    #         "num_leaves": [31, 63],
+    #         "learning_rate": [0.05, 0.1],
+    #         "min_child_samples": [50, 100],
+    #         "subsample": [0.8, 1.0]
+    #     }
+    # },
 }
 
 

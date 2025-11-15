@@ -8,19 +8,12 @@ import pandas as pd
 
 from ..config import load_config
 from ..utils.io_utils import read_csv_safely, write_csv
-from ..utils.lime_utils import explain_instance_lime
+from ..utils.lime_utils import generate_lime_explanation
 from ..utils.logging_utils import setup_logging
 from ..utils.model_utils import predict_proba_safely
-from ..utils.shap_utils import (
-    compute_treeshap_values,
-    plot_global_importance,
-    plot_beeswarm,
-    plot_local_waterfall
-)
+from ..utils.shap_utils import generate_shap_explanations
 
 logger = logging.getLogger(__name__)
-
-CLASS_NAMES = ["benign", "phish"]
 
 
 def select_hard_instance(model, X: pd.DataFrame, y: np.ndarray) -> int:
@@ -49,67 +42,6 @@ def select_hard_instance(model, X: pd.DataFrame, y: np.ndarray) -> int:
     probs = predict_proba_safely(model, X)
     pos_probs = probs[:, 1] if probs.ndim == 2 else probs
     return int(np.argmin(np.abs(pos_probs - 0.5)))
-
-
-def generate_shap_explanations(
-        model,
-        model_key: str,
-        test_sample: pd.DataFrame,
-        test_full: pd.DataFrame,
-        feature_names: list,
-        selected_idx: int,
-        output_dir: str
-) -> bool:
-    """
-    Generate SHAP global and local explanations.
-
-    Returns:
-        True if successful, False otherwise
-    """
-    try:
-        # Global explanations
-        sv = compute_treeshap_values(model, test_sample)
-        plot_global_importance(sv, feature_names, os.path.join(output_dir, f"shap_bar_{model_key}.png"))
-        plot_beeswarm(sv, test_sample, os.path.join(output_dir, f"shap_beeswarm_{model_key}.png"))
-
-        # Local waterfall
-        sv_local = compute_treeshap_values(model, test_full.iloc[[selected_idx]][feature_names])
-        plot_local_waterfall(sv_local, os.path.join(output_dir, f"shap_waterfall_{model_key}.png"))
-
-        return True
-    except Exception as e:
-        logger.warning("SHAP explanations failed for %s: %s", model_key, e)
-        return False
-
-
-def generate_lime_explanation(
-        model,
-        model_key: str,
-        X_train: pd.DataFrame,
-        test_full: pd.DataFrame,
-        feature_names: list,
-        selected_idx: int,
-        output_dir: str
-) -> bool:
-    """
-    Generate LIME local explanation.
-
-    Returns:
-        True if successful, False otherwise
-    """
-    try:
-        explain_instance_lime(
-            model,
-            X_train,
-            feature_names,
-            CLASS_NAMES,
-            test_full.iloc[selected_idx][feature_names],
-            os.path.join(output_dir, f"lime_{model_key}.png")
-        )
-        return True
-    except Exception as e:
-        logger.warning("LIME explanation failed for %s: %s", model_key, e)
-        return False
 
 
 def explain_single_model(

@@ -23,29 +23,33 @@ def get_baseline_models(cfg: Dict) -> Dict[str, Callable[[], Any]]:
     """
     Return a mapping {key -> factory()} for baseline models.
     Notes:
-      - LinearSVM is wrapped in CalibratedClassifierCV to provide calibrated probabilities,
-        making ROC/PR comparisons fair vs. tree ensembles.
+      - LinearSVM is wrapped in CalibratedClassifierCV to provide calibrated probabilities.
+      - Defaults align with Option 2 param grid mid-points.
     """
     return {
         "lr": lambda: LogisticRegression(C=1.0, penalty="l2", solver="liblinear", max_iter=1000),
-        "linear_svm": lambda: CalibratedClassifierCV(LinearSVC(C=1.0), cv=3, method="sigmoid"),
-        "dt": lambda: DecisionTreeClassifier(),
+        "linear_svm": lambda: CalibratedClassifierCV(LinearSVC(C=1.0, max_iter=2000), cv=3, method="sigmoid"),
+        "dt": lambda: DecisionTreeClassifier(max_depth=12, min_samples_split=10, min_samples_leaf=5),
     }
 
 
 def get_ensemble_models(cfg: Dict) -> Dict[str, Callable[[], Any]]:
     """
     Return a mapping {key -> factory()} for ensemble models.
-    Defaults are small and fast; hyperparams will be refined by optional grid search.
+    Defaults align with Option 2 param grid mid-points for fair comparison.
     """
     return {
-        "rf": lambda: RandomForestClassifier(n_estimators=200, n_jobs=-1, class_weight=None),
+        "rf": lambda: RandomForestClassifier(
+            n_estimators=250, max_depth=None, min_samples_leaf=3, n_jobs=-1
+        ),
         "xgb": lambda: xgb.XGBClassifier(
-            n_estimators=400, max_depth=6, learning_rate=0.1, subsample=1.0,
-            colsample_bytree=1.0, tree_method="hist", eval_metric="logloss", n_jobs=-1
+            n_estimators=400, max_depth=6, learning_rate=0.075, subsample=0.9,
+            min_child_weight=2, colsample_bytree=1.0, tree_method="hist",
+            eval_metric="logloss", n_jobs=-1
         ),
         "lgbm": lambda: lgb.LGBMClassifier(
-            n_estimators=600, num_leaves=31, learning_rate=0.1, n_jobs=-1
+            n_estimators=600, num_leaves=47, learning_rate=0.075,
+            min_child_samples=75, subsample=0.9, n_jobs=-1
         ),
     }
 
@@ -57,22 +61,51 @@ def get_param_grids(cfg: Dict) -> Dict[str, Dict]:
     return cfg.get("param_grids", {})
 
 
-def fit_with_grid(model, param_grid: Dict, X, y, scoring="f1_macro", cv=3):
+def fit_with_grid(model, param_grid: Dict, X, y, scoring="f1_macro", cv=3, model_name: str = "model"):
     """
     Fit a model with GridSearchCV if a param grid is provided.
+
+    Args:
+        model: Estimator to train
+        param_grid: Hyperparameter grid (empty dict = no search)
+        X: Training features
+        y: Training labels
+        scoring: Metric for GridSearchCV (default: f1_macro)
+        cv: Number of cross-validation folds
+        model_name: Model identifier for logging
+
     Returns:
-      - best_estimator_: trained estimator
-      - best_params: dictionary of chosen hyperparameters (or empty if no grid)
+        Tuple[estimator, best_params]:
+            - best_estimator_: Trained model (refit on full data if grid used)
+            - best_params: Selected hyperparameters (empty dict if no grid)
     """
     if not param_grid:
+        logger.info("[%s] No param grid - fitting with default params", model_name)
         model.fit(X, y)
         return model, {}
+
     try:
-        gs = GridSearchCV(model, param_grid, scoring=scoring, cv=cv, n_jobs=-1, refit=True)
+        # Calculate grid size for logging
+        n_combos = np.prod([len(v) for v in param_grid.values()])
+        logger.info("[%s] Grid search: %d combinations × %d folds = %d fits",
+                    model_name, n_combos, cv, n_combos * cv)
+
+        gs = GridSearchCV(
+            model,
+            param_grid,
+            scoring=scoring,
+            cv=cv,
+            n_jobs=-1,
+            refit=True,
+        )
         gs.fit(X, y)
+
+        logger.info("[%s] Best params: %s (score: %.4f)",
+                    model_name, gs.best_params_, gs.best_score_)
         return gs.best_estimator_, gs.best_params_
+
     except Exception as e:
-        logger.exception("Grid search failed: %s", e)
+        logger.exception("[%s] Grid search failed: %s", model_name, e)
         raise
 
 

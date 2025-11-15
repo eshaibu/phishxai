@@ -1,7 +1,9 @@
 import logging
+import os
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import shap
 
 logger = logging.getLogger(__name__)
@@ -131,3 +133,34 @@ def plot_local_waterfall(shap_values, outpath: str):
     except Exception as e:
         logger.exception("Failed SHAP waterfall plot: %s", e)
         raise
+
+
+def generate_shap_explanations(
+        model,
+        model_key: str,
+        test_sample: pd.DataFrame,
+        test_full: pd.DataFrame,
+        feature_names: list,
+        selected_idx: int,
+        output_dir: str
+) -> bool:
+    """
+    Generate SHAP global and local explanations.
+
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        # Global explanations
+        sv = compute_treeshap_values(model, test_sample)
+        plot_global_importance(sv, feature_names, os.path.join(output_dir, f"shap_bar_{model_key}.png"))
+        plot_beeswarm(sv, test_sample, os.path.join(output_dir, f"shap_beeswarm_{model_key}.png"))
+
+        # Local waterfall
+        sv_local = compute_treeshap_values(model, test_full.iloc[[selected_idx]][feature_names])
+        plot_local_waterfall(sv_local, os.path.join(output_dir, f"shap_waterfall_{model_key}.png"))
+
+        return True
+    except Exception as e:
+        logger.warning("SHAP explanations failed for %s: %s", model_key, e)
+        return False

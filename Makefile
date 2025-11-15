@@ -29,5 +29,5 @@ error-analysis:
 
 clean:
 	# Remove generated artifacts to reset the project.
-	rm -rf data/interim/* models/* experiments/runs/* reports/figures/* reports/tables/*
-	#rm -rf data/interim/* data/processed/* models/* experiments/runs/* reports/figures/* reports/tables/*
+	#rm -rf data/interim/* models/* experiments/runs/* reports/figures/* reports/tables/*
+	rm -rf data/interim/* data/processed/* models/* experiments/runs/* reports/figures/* reports/tables/*

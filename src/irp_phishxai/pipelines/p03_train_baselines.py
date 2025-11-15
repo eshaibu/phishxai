@@ -41,7 +41,7 @@ def main(cfg_path: str, models: list[str] | None = None):
 
         # Time the fit (or grid-search fit).
         t0 = time.time()
-        best, params = fit_with_grid(model, grids.get(key, {}), X, y, scoring="f1_macro", cv=3)
+        best, params = fit_with_grid(model, grids.get(key, {}), X, y, scoring="f1_macro", cv=3, model_name=key)
         fit_time = time.time() - t0
 
         # Persist model and capture its on-disk size.

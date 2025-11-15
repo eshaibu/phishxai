@@ -1,4 +1,5 @@
 import logging
+import os
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -6,6 +7,8 @@ import pandas as pd
 from lime.lime_tabular import LimeTabularExplainer
 
 logger = logging.getLogger(__name__)
+
+CLASS_NAMES = ["benign", "phish"]
 
 
 def explain_instance_lime(model, X_train, feature_names, class_names, x_row, outpath: str):
@@ -55,3 +58,33 @@ def explain_instance_lime(model, X_train, feature_names, class_names, x_row, out
     except Exception as e:
         logger.exception("Failed LIME explanation: %s", e)
         raise
+
+
+def generate_lime_explanation(
+        model,
+        model_key: str,
+        X_train: pd.DataFrame,
+        test_full: pd.DataFrame,
+        feature_names: list,
+        selected_idx: int,
+        output_dir: str
+) -> bool:
+    """
+    Generate LIME local explanation.
+
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        explain_instance_lime(
+            model,
+            X_train,
+            feature_names,
+            CLASS_NAMES,
+            test_full.iloc[selected_idx][feature_names],
+            os.path.join(output_dir, f"lime_{model_key}.png")
+        )
+        return True
+    except Exception as e:
+        logger.warning("LIME explanation failed for %s: %s", model_key, e)
+        return False

@@ -40,7 +40,7 @@ def main(cfg_path: str, models: list[str] | None = None):
         model = maker()
 
         t0 = time.time()
-        best, params = fit_with_grid(model, grids.get(key, {}), X, y, scoring="f1_macro", cv=3)
+        best, params = fit_with_grid(model, grids.get(key, {}), X, y, scoring="f1_macro", cv=3, model_name=key)
         fit_time = time.time() - t0
 
         persist_model(best, os.path.join(cfg["paths"]["models"], f"{key}.joblib"))
