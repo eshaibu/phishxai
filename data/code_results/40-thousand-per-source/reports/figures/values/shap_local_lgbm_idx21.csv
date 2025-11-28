@@ -1,0 +1,16 @@
+feature,shap_value,feature_value
+subdomain_depth,-3.9871598484866375,0.0
+path_len,-2.5991614631294557,1.0
+url_len,1.7908342085472158,30.0
+n_hyphens,1.3246551122646661,1.0
+host_len,1.0209116122756672,21.0
+shannon_entropy_url,0.29004896878963504,3.7777472
+n_digits,0.09930370587289744,0.0
+query_len,-0.024769450140691533,0.0
+suspicious_token_present,0.014972528043923974,0.0
+n_special,-0.007455802945408501,0.0
+has_ip,0.0,0.0
+pct_encoded,0.0,0.0
+has_at,0.0,0.0
+double_slash_in_path,0.0,0.0
+is_shortener,0.0,0.0

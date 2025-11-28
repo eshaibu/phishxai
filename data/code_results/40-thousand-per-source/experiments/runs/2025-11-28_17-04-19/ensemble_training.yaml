@@ -1,0 +1,46 @@
+rf:
+  best_params:
+    max_depth: null
+    min_samples_leaf: 2
+    n_estimators: 200
+  model_path: rf.joblib
+  fit_time_s: 17.8433
+  model_size_kb: 13141.42
+  feature_names: &id001
+  - url_len
+  - host_len
+  - path_len
+  - query_len
+  - n_digits
+  - n_hyphens
+  - n_special
+  - subdomain_depth
+  - has_ip
+  - has_at
+  - pct_encoded
+  - double_slash_in_path
+  - shannon_entropy_url
+  - is_shortener
+  - suspicious_token_present
+xgb:
+  best_params:
+    learning_rate: 0.05
+    max_depth: 5
+    min_child_weight: 1
+    n_estimators: 400
+    subsample: 1.0
+  model_path: xgb.joblib
+  fit_time_s: 33.1498
+  model_size_kb: 547.05
+  feature_names: *id001
+lgbm:
+  best_params:
+    learning_rate: 0.05
+    min_child_samples: 50
+    n_estimators: 600
+    num_leaves: 31
+    subsample: 0.8
+  model_path: lgbm.joblib
+  fit_time_s: 198.6339
+  model_size_kb: 2057.46
+  feature_names: *id001

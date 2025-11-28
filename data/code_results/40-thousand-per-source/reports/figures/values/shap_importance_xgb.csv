@@ -1,0 +1,16 @@
+feature,mean_abs_shap,rank
+path_len,3.0571194,1
+subdomain_depth,2.605745,2
+url_len,0.94977844,3
+shannon_entropy_url,0.6948291,4
+n_hyphens,0.41197854,5
+host_len,0.3298781,6
+n_digits,0.20706838,7
+n_special,0.07134098,8
+suspicious_token_present,0.003578121,9
+query_len,0.0028388442,10
+has_ip,0.0,11
+pct_encoded,0.0,12
+has_at,0.0,13
+double_slash_in_path,0.0,14
+is_shortener,0.0,15

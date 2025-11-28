@@ -3,7 +3,7 @@
 # ============================================
 
 # Data & model artifacts
-models/
+/models/
 data/files/
 data/interim/
 data/processed/
