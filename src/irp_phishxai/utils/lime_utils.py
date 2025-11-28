@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 from lime.lime_tabular import LimeTabularExplainer
 
+from .io_utils import write_csv, save_json
+
 logger = logging.getLogger(__name__)
 
 CLASS_NAMES = ["benign", "phish"]
@@ -22,6 +24,9 @@ def explain_instance_lime(model, X_train, feature_names, class_names, x_row, out
         class_names: List of class labels
         x_row: Single instance to explain (DataFrame row or NumPy array)
         outpath: Path to save explanation plot
+
+    Returns:
+        exp: LIME Explanation object
     """
     try:
         # Convert X_train to NumPy for LIME explainer
@@ -55,12 +60,50 @@ def explain_instance_lime(model, X_train, feature_names, class_names, x_row, out
         fig.tight_layout()
         fig.savefig(outpath)
         plt.close(fig)
+
+        return exp
+
     except Exception as e:
         logger.exception("Failed LIME explanation: %s", e)
         raise
 
 
-def generate_lime_explanation(
+def save_lime_weights(exp, outpath: str, predicted_class: int = 1):
+    """
+    Save LIME feature weights to CSV with metadata JSON.
+
+    Args:
+        exp: LIME Explanation object
+        outpath: CSV output path (e.g., 'lime_weights_rf_idx42.csv')
+        predicted_class: Class to extract weights for (1 for phishing)
+    """
+    try:
+        # Extract feature weights for predicted class
+        weights = exp.as_list(label=predicted_class)
+
+        lime_df = pd.DataFrame(weights, columns=['feature_condition', 'weight'])
+        lime_df = lime_df.sort_values('weight', key=abs, ascending=False).reset_index(drop=True)
+
+        # Save CSV using utility function
+        write_csv(lime_df, outpath)
+
+        # Save prediction probabilities as separate JSON
+        metadata = {
+            'prediction_proba_class_0': float(exp.predict_proba[0]),
+            'prediction_proba_class_1': float(exp.predict_proba[1]),
+            'explained_class': int(predicted_class)
+        }
+        metadata_path = outpath.replace('.csv', '_metadata. json')
+        save_json(metadata, metadata_path)
+
+        logger.info("Saved LIME weights to %s", outpath)
+
+    except Exception as e:
+        logger.exception("Failed to save LIME weights: %s", e)
+        raise
+
+
+def generate_lime_explanation_with_values(
         model,
         model_key: str,
         X_train: pd.DataFrame,
@@ -70,13 +113,18 @@ def generate_lime_explanation(
         output_dir: str
 ) -> bool:
     """
-    Generate LIME local explanation.
+    Generate LIME local explanation with quantitative outputs.
 
     Returns:
         True if successful, False otherwise
     """
     try:
-        explain_instance_lime(
+        # Create values subdirectory
+        values_dir = os.path.join(output_dir, "values")
+        os.makedirs(values_dir, exist_ok=True)
+
+        # Generate explanation
+        exp = explain_instance_lime(
             model,
             X_train,
             feature_names,
@@ -84,7 +132,15 @@ def generate_lime_explanation(
             test_full.iloc[selected_idx][feature_names],
             os.path.join(output_dir, f"lime_{model_key}.png")
         )
+
+        # Save weights
+        save_lime_weights(
+            exp,
+            os.path.join(values_dir, f"lime_weights_{model_key}_idx{selected_idx}.csv")
+        )
+
         return True
+
     except Exception as e:
         logger.warning("LIME explanation failed for %s: %s", model_key, e)
         return False

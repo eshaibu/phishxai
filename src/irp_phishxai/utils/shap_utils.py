@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 import shap
 
+from .io_utils import write_csv, save_json
+
 logger = logging.getLogger(__name__)
 
 
@@ -135,7 +137,99 @@ def plot_local_waterfall(shap_values, outpath: str):
         raise
 
 
-def generate_shap_explanations(
+def save_global_importance_values(shap_values, feature_names, outpath: str) -> pd.DataFrame:
+    """
+    Save quantitative global feature importance (mean |SHAP|) to CSV.
+
+    Args:
+        shap_values: SHAP Explanation object
+        feature_names: List of feature names
+        outpath: CSV output path (e.g., 'shap_importance_rf.csv')
+
+    Returns:
+        DataFrame with feature importance rankings
+    """
+    try:
+        shap_values_pos = select_positive_class_values(shap_values)
+
+        # Compute mean absolute SHAP value per feature
+        mean_abs_shap = np.abs(shap_values_pos.values).mean(axis=0)
+
+        # Create DataFrame sorted by importance
+        importance_df = pd.DataFrame({
+            'feature': feature_names,
+            'mean_abs_shap': mean_abs_shap
+        }).sort_values('mean_abs_shap', ascending=False).reset_index(drop=True)
+
+        # Add rank column
+        importance_df['rank'] = range(1, len(importance_df) + 1)
+
+        write_csv(importance_df, outpath)
+        logger.info("Saved SHAP importance values to %s", outpath)
+        return importance_df
+
+    except Exception as e:
+        logger.exception("Failed to save SHAP importance values: %s", e)
+        raise
+
+
+def save_local_shap_values(shap_values, feature_names, instance_idx: int, outpath: str):
+    """
+    Save SHAP values for a single instance to CSV with metadata JSON.
+
+    Args:
+        shap_values: SHAP Explanation object (should be single instance)
+        feature_names: List of feature names
+        instance_idx: Index of instance being explained
+        outpath: CSV output path (e.g., 'shap_local_rf_idx42.csv')
+    """
+    try:
+        shap_values_pos = select_positive_class_values(shap_values)
+
+        # Extract single instance
+        if shap_values_pos.values.ndim > 1:
+            instance_shap = shap_values_pos.values[0]
+            instance_data = shap_values_pos.data[0] if shap_values_pos.data is not None else None
+            base_value = shap_values_pos.base_values[0] if hasattr(shap_values_pos.base_values,
+                                                                   '__len__') else shap_values_pos.base_values
+        else:
+            instance_shap = shap_values_pos.values
+            instance_data = shap_values_pos.data
+            base_value = shap_values_pos.base_values
+
+        # Create DataFrame with feature values and SHAP contributions
+        local_data = {
+            'feature': feature_names,
+            'shap_value': instance_shap
+        }
+
+        if instance_data is not None:
+            local_data['feature_value'] = instance_data
+
+        local_df = pd.DataFrame(local_data)
+        local_df = local_df.sort_values('shap_value', key=abs, ascending=False).reset_index(drop=True)
+
+        # Save CSV using utility function
+        write_csv(local_df, outpath)
+
+        # Save metadata as separate JSON file
+        metadata = {
+            'instance_idx': int(instance_idx),
+            'base_value': float(base_value),
+            'shap_sum': float(instance_shap.sum()),
+            'prediction': float(base_value + instance_shap.sum())
+        }
+        metadata_path = outpath.replace('.csv', '_metadata.json')
+        save_json(metadata, metadata_path)
+
+        logger.info("Saved local SHAP values to %s", outpath)
+
+    except Exception as e:
+        logger.exception("Failed to save local SHAP values: %s", e)
+        raise
+
+
+def generate_shap_explanations_with_values(
         model,
         model_key: str,
         test_sample: pd.DataFrame,
@@ -143,24 +237,44 @@ def generate_shap_explanations(
         feature_names: list,
         selected_idx: int,
         output_dir: str
-) -> bool:
+) -> tuple:
     """
-    Generate SHAP global and local explanations.
+    Generate SHAP global and local explanations with quantitative outputs.
 
     Returns:
-        True if successful, False otherwise
+        (success: bool, importance_df: pd.DataFrame or None)
     """
     try:
+        # Create values subdirectory
+        values_dir = os.path.join(output_dir, "values")
+        os.makedirs(values_dir, exist_ok=True)
+
         # Global explanations
         sv = compute_treeshap_values(model, test_sample)
         plot_global_importance(sv, feature_names, os.path.join(output_dir, f"shap_bar_{model_key}.png"))
         plot_beeswarm(sv, test_sample, os.path.join(output_dir, f"shap_beeswarm_{model_key}.png"))
 
+        # Save global importance values
+        importance_df = save_global_importance_values(
+            sv,
+            feature_names,
+            os.path.join(values_dir, f"shap_importance_{model_key}.csv")
+        )
+
         # Local waterfall
         sv_local = compute_treeshap_values(model, test_full.iloc[[selected_idx]][feature_names])
         plot_local_waterfall(sv_local, os.path.join(output_dir, f"shap_waterfall_{model_key}.png"))
 
-        return True
+        # Save local SHAP values
+        save_local_shap_values(
+            sv_local,
+            feature_names,
+            selected_idx,
+            os.path.join(values_dir, f"shap_local_{model_key}_idx{selected_idx}.csv")
+        )
+
+        return True, importance_df
+
     except Exception as e:
         logger.warning("SHAP explanations failed for %s: %s", model_key, e)
-        return False
+        return False, None
