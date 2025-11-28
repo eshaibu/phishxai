@@ -110,7 +110,8 @@ def generate_lime_explanation_with_values(
         test_full: pd.DataFrame,
         feature_names: list,
         selected_idx: int,
-        output_dir: str
+        figures_dir: str,
+        tables_dir: str
 ) -> bool:
     """
     Generate LIME local explanation with quantitative outputs.
@@ -119,10 +120,6 @@ def generate_lime_explanation_with_values(
         True if successful, False otherwise
     """
     try:
-        # Create values subdirectory
-        values_dir = os.path.join(output_dir, "values")
-        os.makedirs(values_dir, exist_ok=True)
-
         # Generate explanation
         exp = explain_instance_lime(
             model,
@@ -130,13 +127,13 @@ def generate_lime_explanation_with_values(
             feature_names,
             CLASS_NAMES,
             test_full.iloc[selected_idx][feature_names],
-            os.path.join(output_dir, f"lime_{model_key}.png")
+            os.path.join(figures_dir, f"lime_{model_key}.png")
         )
 
         # Save weights
         save_lime_weights(
             exp,
-            os.path.join(values_dir, f"lime_weights_{model_key}_idx{selected_idx}.csv")
+            os.path.join(tables_dir, f"lime_weights_{model_key}_idx{selected_idx}.csv")
         )
 
         return True

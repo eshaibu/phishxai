@@ -236,7 +236,8 @@ def generate_shap_explanations_with_values(
         test_full: pd.DataFrame,
         feature_names: list,
         selected_idx: int,
-        output_dir: str
+        figures_dir: str,
+        tables_dir: str
 ) -> tuple:
     """
     Generate SHAP global and local explanations with quantitative outputs.
@@ -245,32 +246,28 @@ def generate_shap_explanations_with_values(
         (success: bool, importance_df: pd.DataFrame or None)
     """
     try:
-        # Create values subdirectory
-        values_dir = os.path.join(output_dir, "values")
-        os.makedirs(values_dir, exist_ok=True)
-
         # Global explanations
         sv = compute_treeshap_values(model, test_sample)
-        plot_global_importance(sv, feature_names, os.path.join(output_dir, f"shap_bar_{model_key}.png"))
-        plot_beeswarm(sv, test_sample, os.path.join(output_dir, f"shap_beeswarm_{model_key}.png"))
+        plot_global_importance(sv, feature_names, os.path.join(figures_dir, f"shap_bar_{model_key}.png"))
+        plot_beeswarm(sv, test_sample, os.path.join(figures_dir, f"shap_beeswarm_{model_key}.png"))
 
         # Save global importance values
         importance_df = save_global_importance_values(
             sv,
             feature_names,
-            os.path.join(values_dir, f"shap_importance_{model_key}.csv")
+            os.path.join(tables_dir, f"shap_importance_{model_key}.csv")
         )
 
         # Local waterfall
         sv_local = compute_treeshap_values(model, test_full.iloc[[selected_idx]][feature_names])
-        plot_local_waterfall(sv_local, os.path.join(output_dir, f"shap_waterfall_{model_key}.png"))
+        plot_local_waterfall(sv_local, os.path.join(figures_dir, f"shap_waterfall_{model_key}.png"))
 
         # Save local SHAP values
         save_local_shap_values(
             sv_local,
             feature_names,
             selected_idx,
-            os.path.join(values_dir, f"shap_local_{model_key}_idx{selected_idx}.csv")
+            os.path.join(tables_dir, f"shap_local_{model_key}_idx{selected_idx}.csv")
         )
 
         return True, importance_df

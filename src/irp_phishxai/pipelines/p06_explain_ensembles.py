@@ -49,7 +49,8 @@ def explain_single_model(
         cfg: dict,
         test: pd.DataFrame,
         feature_names: list,
-        output_dir: str
+        figures_dir: str,
+        tables_dir: str
 ) -> Optional[dict]:
     """
     Generate all explanations for a single model.
@@ -79,11 +80,11 @@ def explain_single_model(
 
     # Generate explanations with quantitative outputs
     shap_success, shap_importance_df = generate_shap_explanations_with_values(
-        model, model_key, test_sample, test, feature_names, selected_idx, output_dir
+        model, model_key, test_sample, test, feature_names, selected_idx, figures_dir, tables_dir
     )
 
     lime_success = generate_lime_explanation_with_values(
-        model, model_key, X, test, feature_names, selected_idx, output_dir
+        model, model_key, X, test, feature_names, selected_idx, figures_dir, tables_dir
     )
 
     return {
@@ -164,12 +165,11 @@ def main(cfg_path: str, models: Optional[list[str]] = None):
     explain_models = models or cfg["models"]["explain"]
     output_dir = os.path.join(cfg["paths"]["reports"], "figures")
     tables_dir = os.path.join(cfg["paths"]["reports"], "tables")
-    os.makedirs(tables_dir, exist_ok=True)
 
     # Generate explanations for each model
     results = []
     for model_key in explain_models:
-        result = explain_single_model(model_key, cfg, test, feature_names, output_dir)
+        result = explain_single_model(model_key, cfg, test, feature_names, output_dir, tables_dir)
         if result:
             results.append(result)
 
