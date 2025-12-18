@@ -81,20 +81,11 @@ data/raw/
 The Makefile provides convenient commands for running individual pipeline stages:
 
 ```bash
-# Clean and align raw datasets
-make clean-align
+# Clean and align raw datasets, Extract lexical features, and Split into train/test sets
+make build-dataset
 
-# Extract lexical features
-make extract-features
-
-# Split into train/test sets
-make split-data
-
-# Train baseline classifiers
-make train-baselines
-
-# Train ensemble models
-make train-ensembles
+# Train baseline and ensemble models
+make train
 
 # Evaluate all models
 make evaluate
@@ -104,9 +95,6 @@ make explain
 
 # Perform error analysis
 make error-analysis
-
-# Generate model configuration table
-make model-configs
 ```
 
 ### Run Complete Pipeline
